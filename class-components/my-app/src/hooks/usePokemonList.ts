@@ -1,30 +1,16 @@
-import { useEffect, useState } from 'react';
-import { fetchPokemonList } from '../api/api';
-import type { PokemonItem } from '../types';
+import { useGetPokemonListQuery } from '../api/pokemonApi';
 
 export function usePokemonList(searchTerm: string, page: number) {
-  const [pokemons, setPokemons] = useState<PokemonItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data,
+    isLoading: loading,
+    isError,
+    error,
+  } = useGetPokemonListQuery({ searchTerm, page });
 
-  useEffect(() => {
-    const offset = (page - 1) * 10;
-
-    const load = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchPokemonList(searchTerm, 10, offset);
-        setPokemons(data.results);
-      } catch (err) {
-        setError('Failed to fetch Pokemons');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-  }, [searchTerm, page]);
-
-  return { pokemons, loading, error };
+  return {
+    pokemons: data?.results ?? [],
+    loading,
+    error: isError ? 'Failed to fetch Pokemons' : null,
+  };
 }
