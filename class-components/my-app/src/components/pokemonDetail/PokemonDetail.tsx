@@ -1,35 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useGetPokemonByNameQuery } from '../../api/pokemonApi';
 import './PokemonDetail.css';
-
-interface PokemonDetails {
-  name: string;
-  sprites: {
-    front_default: string;
-  };
-  height: number;
-  weight: number;
-}
 
 const PokemonDetail: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const detailsId = searchParams.get('details');
-  const [pokemon, setPokemon] = useState<PokemonDetails | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!detailsId) {
-      setPokemon(null);
-      return;
-    }
-
-    setLoading(true);
-    fetch(`https://pokeapi.co/api/v2/pokemon/${detailsId}`)
-      .then((res) => res.json())
-      .then((data) => setPokemon(data))
-      .catch(() => setPokemon(null))
-      .finally(() => setLoading(false));
-  }, [detailsId]);
+  const { data: pokemon, isLoading, isError } = useGetPokemonByNameQuery(detailsId!, {
+    skip: !detailsId,
+  });
 
   const handleClose = () => {
     searchParams.delete('details');
@@ -43,8 +23,8 @@ const PokemonDetail: React.FC = () => {
       <button className="pokemon-detail__close-button" onClick={handleClose}>
         Close
       </button>
-      {loading && <p>Loading details...</p>}
-      {!loading && !pokemon && <p>Pokemon not found</p>}
+      {isLoading && <p>Loading details...</p>}
+      {isError && <p>Pokemon not found</p>}
       {pokemon && (
         <div className="pokemon-detail__info">
           <h2>{pokemon.name}</h2>
