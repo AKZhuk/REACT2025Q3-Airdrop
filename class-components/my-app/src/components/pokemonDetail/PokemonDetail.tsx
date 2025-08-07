@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  useLazyGetPokemonByNameQuery,
-} from '../../api/pokemonApi';
+import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
 import './PokemonDetail.css';
 
 const PokemonDetail: React.FC = () => {
@@ -25,16 +23,28 @@ const PokemonDetail: React.FC = () => {
     setSearchParams(searchParams);
   };
 
+  const handleRefresh = () => {
+    if (detailsId) {
+      triggerFetch(detailsId, true);
+    }
+  };
+
   if (!detailsId) return null;
 
   return (
     <div className="pokemon-detail">
-      <button
-        className="pokemon-detail__close-button"
-        onClick={handleClose}
-      >
-        Close
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <button className="pokemon-detail__close-button" onClick={handleClose}>
+          Close
+        </button>
+        <button
+          className="pokemon-detail__close-button"
+          onClick={handleRefresh}
+        >
+          🔄 Refresh
+        </button>
+      </div>
+
       {isLoading && <p>Loading details...</p>}
       {isError && <p>Pokemon not found</p>}
       {pokemon && (
