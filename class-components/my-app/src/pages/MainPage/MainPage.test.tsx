@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import MainPage from './MainPage';
 
@@ -25,9 +25,20 @@ jest.mock('../../hooks/usePokemonList', () => ({
   usePokemonList: jest.fn(),
 }));
 
+jest.mock('../../api/pokemonApi', () => ({
+  useGetPokemonListQuery: jest.fn(() => ({
+    refetch: jest.fn(),
+  })),
+}));
+
 import { usePokemonList } from '../../hooks/usePokemonList';
+import { useGetPokemonListQuery } from '../../api/pokemonApi';
 
 describe('MainPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders loading state', () => {
     (usePokemonList as jest.Mock).mockReturnValue({
       pokemons: [],
@@ -61,5 +72,27 @@ describe('MainPage', () => {
     render(<MainPage />, { wrapper: MemoryRouter });
     expect(screen.getByTestId('mock-cardlist')).toBeInTheDocument();
     expect(screen.getByTestId('mock-pagination')).toBeInTheDocument();
+  });
+
+  it('calls refetch when refresh button is clicked', () => {
+    const refetchMock = jest.fn();
+
+
+    (useGetPokemonListQuery as jest.Mock).mockReturnValue({
+      refetch: refetchMock,
+    });
+
+    (usePokemonList as jest.Mock).mockReturnValue({
+      pokemons: [],
+      loading: false,
+      error: '',
+    });
+
+    render(<MainPage />, { wrapper: MemoryRouter });
+
+    const button = screen.getByRole('button', { name: /refresh/i });
+    fireEvent.click(button);
+
+    expect(refetchMock).toHaveBeenCalled();
   });
 });
