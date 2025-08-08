@@ -5,7 +5,6 @@ export function usePokemonList(searchTerm: string, page: number) {
     data,
     isLoading: loading,
     isError,
-    error,
   } = useGetPokemonListQuery({ searchTerm, page });
 
   return {

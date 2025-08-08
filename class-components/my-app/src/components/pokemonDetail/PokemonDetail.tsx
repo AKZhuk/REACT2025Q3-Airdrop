@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
 import './PokemonDetail.css';
@@ -6,17 +6,19 @@ import './PokemonDetail.css';
 const PokemonDetail: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const detailsId = searchParams.get('details');
-
+  
   const [
     triggerFetch,
     { data: pokemon, isLoading, isError },
   ] = useLazyGetPokemonByNameQuery();
 
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
   useEffect(() => {
     if (detailsId) {
       triggerFetch(detailsId);
     }
-  }, [detailsId, triggerFetch]);
+  }, [detailsId, refreshCounter, triggerFetch]);
 
   const handleClose = () => {
     searchParams.delete('details');
@@ -24,9 +26,7 @@ const PokemonDetail: React.FC = () => {
   };
 
   const handleRefresh = () => {
-    if (detailsId) {
-      triggerFetch(detailsId, true);
-    }
+    setRefreshCounter((prev) => prev + 1);
   };
 
   if (!detailsId) return null;
