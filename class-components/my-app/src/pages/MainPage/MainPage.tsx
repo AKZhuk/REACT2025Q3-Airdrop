@@ -2,10 +2,9 @@ import React from 'react';
 import CardList from '../../components/cardList/CardList';
 import Search from '../../components/search/Search';
 import Pagination from '../../components/pagination/Pagination';
-import { pokemonApi } from '../../api/pokemonApi';
 import { useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '../../store/hooks';
-import { useGetPokemonListQuery } from '../../api/pokemonApi';
+import { pokemonApi, useGetPokemonListQuery } from '../../api/pokemonApi';
 import './MainPage.css';
 
 const MainPage = () => {
@@ -14,25 +13,23 @@ const MainPage = () => {
   const page = Number(searchParams.get('page')) || 1;
   const dispatch = useAppDispatch();
 
-
   const {
     data,
     isLoading,
     isError,
     error,
-  } = useGetPokemonListQuery(
-    { searchTerm, page },
-    {
-      refetchOnMountOrArgChange: true,
-    }
-  );
+    refetch,
+  } = useGetPokemonListQuery({ searchTerm, page }, { refetchOnMountOrArgChange: true });
 
   const handleSearch = (term: string) => {
     setSearchParams({ q: term, page: '1' });
   };
 
-  const handleRefresh = () => {
-    dispatch(pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }]));
+  const handleRefresh = async () => {
+    await dispatch(
+      pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }])
+    );
+    refetch();
   };
 
   return (

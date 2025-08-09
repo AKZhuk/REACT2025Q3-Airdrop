@@ -1,32 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
+import { useDispatch } from 'react-redux';
+import { pokemonApi } from '../../api/pokemonApi';
 import './PokemonDetail.css';
 
 const PokemonDetail: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const detailsId = searchParams.get('details');
-  
+
+  const dispatch = useDispatch();
+
   const [
     triggerFetch,
     { data: pokemon, isLoading, isError },
   ] = useLazyGetPokemonByNameQuery();
 
-  const [refreshCounter, setRefreshCounter] = useState(0);
-
   useEffect(() => {
     if (detailsId) {
       triggerFetch(detailsId);
     }
-  }, [detailsId, refreshCounter, triggerFetch]);
+  }, [detailsId, triggerFetch]);
 
   const handleClose = () => {
     searchParams.delete('details');
     setSearchParams(searchParams);
   };
 
-  const handleRefresh = () => {
-    setRefreshCounter((prev) => prev + 1);
+  const handleRefresh = async () => {
+    if (detailsId) {
+      await dispatch(
+        pokemonApi.util.invalidateTags([{ type: 'PokemonDetails', id: detailsId }])
+      );
+      triggerFetch(detailsId, true); // 🔁 Повторный запрос вручную
+    }
   };
 
   if (!detailsId) return null;
@@ -37,10 +44,7 @@ const PokemonDetail: React.FC = () => {
         <button className="pokemon-detail__close-button" onClick={handleClose}>
           Close
         </button>
-        <button
-          className="pokemon-detail__close-button"
-          onClick={handleRefresh}
-        >
+        <button className="pokemon-detail__close-button" onClick={handleRefresh}>
           🔄 Refresh
         </button>
       </div>

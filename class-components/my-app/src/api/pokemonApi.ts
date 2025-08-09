@@ -5,7 +5,7 @@ import type { PokemonDetails } from '../types/types';
 export const pokemonApi = createApi({
   reducerPath: 'pokemonApi',
   baseQuery: fetchBaseQuery({ baseUrl: 'https://pokeapi.co/api/v2/' }),
-  tagTypes: ['PokemonList'],
+  tagTypes: ['PokemonList', 'PokemonDetails'],
   endpoints: (builder) => ({
     getPokemonList: builder.query<PokemonApiResponse, { searchTerm: string; page: number }>({
       query: ({ searchTerm, page }) => {
@@ -28,6 +28,7 @@ export const pokemonApi = createApi({
 
     getPokemonByName: builder.query<PokemonDetails, string>({
       query: (name) => `pokemon/${name}`,
+      providesTags: (result, error, name) => [{ type: 'PokemonDetails', id: name }],
     }),
   }),
 });
