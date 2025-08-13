@@ -12,14 +12,18 @@ export const pokemonApi = createApi({
         const limit = 10;
         const offset = (page - 1) * limit;
         const trimmedSearchTerm = searchTerm.trim().toLowerCase();
-        return `pokemon?limit=${limit}&offset=${offset}&search=${encodeURIComponent(trimmedSearchTerm)}`;
+        return `pokemon?limit=${limit}&offset=${offset}&search=${encodeURIComponent(
+          trimmedSearchTerm
+        )}`;
       },
-      transformResponse: (response: PokemonApiResponse, _, { searchTerm }) => {
-        if (!searchTerm.trim()) return response;
+      transformResponse: (response: PokemonApiResponse, _meta, { searchTerm }) => {
+        const trimmedSearchTerm = searchTerm.trim().toLowerCase();
+        if (!trimmedSearchTerm) return response;
+
         return {
           ...response,
           results: response.results.filter((item) =>
-            item.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
+            item.name.toLowerCase().includes(trimmedSearchTerm)
           ),
         };
       },
@@ -28,7 +32,7 @@ export const pokemonApi = createApi({
 
     getPokemonByName: builder.query<PokemonDetails, string>({
       query: (name) => `pokemon/${name}`,
-      providesTags: (result, error, name) => [{ type: 'PokemonDetails', id: name }],
+      providesTags: (_result, _error, name) => [{ type: 'PokemonDetails', id: name }],
     }),
   }),
 });

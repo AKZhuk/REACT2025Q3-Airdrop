@@ -6,6 +6,7 @@
   color: var(--text-color);
 }
 
+.pokemon-detail__refresh-button,
 .pokemon-detail__close-button {
   background-color: var(--close-button-bg);
   color: var(--close-button-text);
@@ -16,6 +17,7 @@
   cursor: pointer;
 }
 
+.pokemon-detail__refresh-button:hover,
 .pokemon-detail__close-button:hover {
   background-color: var(--close-button-hover);
 }

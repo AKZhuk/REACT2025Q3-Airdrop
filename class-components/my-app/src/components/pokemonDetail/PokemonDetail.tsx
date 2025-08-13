@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
+import { useLazyGetPokemonByNameQuery, pokemonApi } from '../../api/pokemonApi';
 import { useDispatch } from 'react-redux';
-import { pokemonApi } from '../../api/pokemonApi';
 import './PokemonDetail.css';
 
 const PokemonDetail: React.FC = () => {
@@ -12,15 +11,15 @@ const PokemonDetail: React.FC = () => {
   const dispatch = useDispatch();
 
   const [
-    triggerFetch,
+    fetchPokemonByName,
     { data: pokemon, isLoading, isError },
   ] = useLazyGetPokemonByNameQuery();
 
   useEffect(() => {
     if (detailsId) {
-      triggerFetch(detailsId);
+      fetchPokemonByName(detailsId);
     }
-  }, [detailsId, triggerFetch]);
+  }, [detailsId, fetchPokemonByName]);
 
   const handleClose = () => {
     searchParams.delete('details');
@@ -32,7 +31,7 @@ const PokemonDetail: React.FC = () => {
       await dispatch(
         pokemonApi.util.invalidateTags([{ type: 'PokemonDetails', id: detailsId }])
       );
-      triggerFetch(detailsId, true); // 🔁 Повторный запрос вручную
+      fetchPokemonByName(detailsId, true);
     }
   };
 
@@ -44,7 +43,7 @@ const PokemonDetail: React.FC = () => {
         <button className="pokemon-detail__close-button" onClick={handleClose}>
           Close
         </button>
-        <button className="pokemon-detail__close-button" onClick={handleRefresh}>
+        <button className="pokemon-detail__refresh-button" onClick={handleRefresh}>
           🔄 Refresh
         </button>
       </div>
@@ -54,10 +53,7 @@ const PokemonDetail: React.FC = () => {
       {pokemon && (
         <div className="pokemon-detail__info">
           <h2>{pokemon.name}</h2>
-          <img
-            src={pokemon.sprites.front_default}
-            alt={pokemon.name}
-          />
+          <img src={pokemon.sprites.front_default} alt={pokemon.name} />
           <p>Height: {pokemon.height}</p>
           <p>Weight: {pokemon.weight}</p>
         </div>
