@@ -2,6 +2,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import MainPage from './MainPage';
+import { pokemonApi, useGetPokemonListQuery } from '../../api/pokemonApi';
+
+const mockDispatch = jest.fn();
+jest.mock('../../store/hooks', () => ({
+  useAppDispatch: () => mockDispatch,
+}));
 
 jest.mock('../../components/search/Search', () => {
   const MockSearch = () => <div data-testid="mock-search">Search</div>;
@@ -21,78 +27,75 @@ jest.mock('../../components/pagination/Pagination', () => {
   return MockPagination;
 });
 
-jest.mock('../../hooks/usePokemonList', () => ({
-  usePokemonList: jest.fn(),
-}));
-
-jest.mock('../../api/pokemonApi', () => ({
-  useGetPokemonListQuery: jest.fn(() => ({
-    refetch: jest.fn(),
-  })),
-}));
-
-import { usePokemonList } from '../../hooks/usePokemonList';
-import { useGetPokemonListQuery } from '../../api/pokemonApi';
+jest.mock('../../api/pokemonApi', () => {
+  const actual = jest.requireActual('../../api/pokemonApi');
+  return {
+    ...actual,
+    useGetPokemonListQuery: jest.fn(),
+  };
+});
 
 describe('MainPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockDispatch.mockReset();
+    (useGetPokemonListQuery as jest.Mock).mockReset();
   });
 
   it('renders loading state', () => {
-    (usePokemonList as jest.Mock).mockReturnValue({
-      pokemons: [],
-      loading: true,
-      error: '',
+    (useGetPokemonListQuery as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: undefined,
     });
 
     render(<MainPage />, { wrapper: MemoryRouter });
+
     expect(screen.getByTestId('mock-search')).toBeInTheDocument();
-    expect(screen.getByText(/loading.../i)).toBeInTheDocument();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
   it('renders error state', () => {
-    (usePokemonList as jest.Mock).mockReturnValue({
-      pokemons: [],
-      loading: false,
-      error: 'Failed to fetch data',
+    (useGetPokemonListQuery as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new Error('Failed to fetch data'),
     });
 
     render(<MainPage />, { wrapper: MemoryRouter });
+
     expect(screen.getByText(/failed to fetch data/i)).toBeInTheDocument();
   });
 
   it('renders data state with CardList and Pagination', () => {
-    (usePokemonList as jest.Mock).mockReturnValue({
-      pokemons: [{ name: 'pikachu', url: 'https://pokeapi.co/api/v2/pokemon/25/' }],
-      loading: false,
-      error: '',
+    (useGetPokemonListQuery as jest.Mock).mockReturnValue({
+      data: { results: [{ name: 'pikachu', url: 'https://pokeapi.co/api/v2/pokemon/25/' }] },
+      isLoading: false,
+      isError: false,
+      error: undefined,
     });
 
     render(<MainPage />, { wrapper: MemoryRouter });
+
     expect(screen.getByTestId('mock-cardlist')).toBeInTheDocument();
     expect(screen.getByTestId('mock-pagination')).toBeInTheDocument();
   });
 
-  it('calls refetch when refresh button is clicked', () => {
-    const refetchMock = jest.fn();
-
-
+  it('dispatches invalidateTags on refresh click', () => {
     (useGetPokemonListQuery as jest.Mock).mockReturnValue({
-      refetch: refetchMock,
-    });
-
-    (usePokemonList as jest.Mock).mockReturnValue({
-      pokemons: [],
-      loading: false,
-      error: '',
+      data: { results: [] },
+      isLoading: false,
+      isError: false,
+      error: undefined,
     });
 
     render(<MainPage />, { wrapper: MemoryRouter });
 
-    const button = screen.getByRole('button', { name: /refresh/i });
-    fireEvent.click(button);
+    fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
 
-    expect(refetchMock).toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith(
+      pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }])
+    );
   });
 });

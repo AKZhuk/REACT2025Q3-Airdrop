@@ -1,16 +1,20 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter, useSearchParams } from 'react-router-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, useSearchParams, useLocation } from 'react-router-dom';
 import Pagination from './Pagination';
 
 const WrapperWithSearchParams: React.FC<{ initialPage?: string }> = ({ initialPage = '1' }) => {
   const [, setSearchParams] = useSearchParams();
-
   React.useEffect(() => {
     setSearchParams({ page: initialPage });
   }, [initialPage, setSearchParams]);
-
   return <Pagination />;
+};
+
+const LocationReader: React.FC = () => {
+  const { search } = useLocation();
+  return <div data-testid="location-search">{search}</div>;
 };
 
 describe('Pagination component', () => {
@@ -20,7 +24,6 @@ describe('Pagination component', () => {
         <Pagination />
       </MemoryRouter>
     );
-
     expect(screen.getByText(/Page 3/i)).toBeInTheDocument();
   });
 
@@ -30,34 +33,32 @@ describe('Pagination component', () => {
         <Pagination />
       </MemoryRouter>
     );
-
-    const prevButton = screen.getByRole('button', { name: /previous/i });
-    expect(prevButton).toBeDisabled();
+    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled();
   });
 
-  it('clicking "Next" updates the page', () => {
+  it('clicking "Next" updates the page and query param', async () => {
     render(
       <MemoryRouter initialEntries={['/?page=2']}>
         <WrapperWithSearchParams initialPage="2" />
+        <LocationReader />
       </MemoryRouter>
     );
 
-    const nextButton = screen.getByRole('button', { name: /next/i });
-    fireEvent.click(nextButton);
-
-    expect(screen.getByText(/Page 3/i)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(await screen.findByText(/Page 3/i)).toBeInTheDocument();
+    expect(screen.getByTestId('location-search').textContent).toContain('page=3');
   });
 
-  it('clicking "Previous" works when page > 1', () => {
+  it('clicking "Previous" works when page > 1', async () => {
     render(
       <MemoryRouter initialEntries={['/?page=5']}>
         <WrapperWithSearchParams initialPage="5" />
+        <LocationReader />
       </MemoryRouter>
     );
 
-    const prevButton = screen.getByRole('button', { name: /previous/i });
-    fireEvent.click(prevButton);
-
-    expect(screen.getByText(/Page 4/i)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /previous/i }));
+    expect(await screen.findByText(/Page 4/i)).toBeInTheDocument();
+    expect(screen.getByTestId('location-search').textContent).toContain('page=4');
   });
 });

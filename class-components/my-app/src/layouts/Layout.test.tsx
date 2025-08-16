@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { screen } from '@testing-library/react';
+import { renderWithProviders } from '../test/test-utils';
 import Layout from './Layout';
 
 jest.mock('../components/header/Header', () => {
@@ -11,25 +11,21 @@ jest.mock('../components/header/Header', () => {
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
+  const MockOutlet = () => <div data-testid="mock-outlet">Mock Outlet Content</div>;
+  MockOutlet.displayName = 'MockOutlet';
   return {
     ...actual,
-    Outlet: () => <div data-testid="mock-outlet">Mock Outlet Content</div>,
+    Outlet: MockOutlet,
   };
 });
 
 describe('Layout', () => {
   it('renders Header, navigation links, and Outlet content', () => {
-    render(
-      <MemoryRouter>
-        <Layout />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Layout />, { route: '/' });
 
     expect(screen.getByTestId('mock-header')).toBeInTheDocument();
-
     expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /about/i })).toBeInTheDocument();
-
     expect(screen.getByTestId('mock-outlet')).toBeInTheDocument();
   });
 });

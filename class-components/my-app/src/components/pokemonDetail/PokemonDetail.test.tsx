@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import PokemonDetail from './PokemonDetail';
 import { MemoryRouter, useSearchParams } from 'react-router-dom';
 import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
-import type { PokemonDetails } from '../../types/types'; // ✅ импортируем тип
+import type { PokemonDetails } from '../../types/types';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -25,16 +25,14 @@ describe('PokemonDetail component (RTK Query)', () => {
     data: PokemonDetails | null;
     isLoading: boolean;
     isError: boolean;
-    refetch: jest.Mock;
   } = {
     data: null,
     isLoading: false,
     isError: false,
-    refetch: jest.fn(),
   };
 
   const setup = (detailsId: string | null) => {
-    (useSearchParams as jest.Mock).mockReturnValue([
+    (useSearchParams as jest.MockedFunction<typeof useSearchParams>).mockReturnValue([
       new URLSearchParams(detailsId ? `details=${detailsId}` : ''),
       mockSetSearchParams,
     ]);
@@ -105,9 +103,7 @@ describe('PokemonDetail component (RTK Query)', () => {
 
     setup('bulbasaur');
 
-    const button = screen.getByRole('button', { name: /close/i });
-    fireEvent.click(button);
-
+    fireEvent.click(screen.getByRole('button', { name: /close/i }));
     expect(mockSetSearchParams).toHaveBeenCalled();
   });
 });

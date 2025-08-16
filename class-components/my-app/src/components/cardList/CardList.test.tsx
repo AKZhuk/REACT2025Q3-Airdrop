@@ -3,20 +3,19 @@ import { render, screen } from '@testing-library/react';
 import CardList from './CardList';
 import type { PokemonItem } from '../../types';
 
-jest.mock('./Card', () => ({
-  __esModule: true,
-  default: ({ pokemon }: { pokemon: PokemonItem }) => (
+jest.mock('../card/Card', () => {
+  const MockCard = ({ pokemon }: { pokemon: PokemonItem }) => (
     <div data-testid="mock-card">{pokemon.name}</div>
-  ),
-}));
-
-const SPRITE_BASE_URL = 'https://pokeapi.co/api/v2/pokemon/';
+  );
+  MockCard.displayName = 'MockCard';
+  return { __esModule: true, default: MockCard };
+});
 
 describe('CardList component', () => {
   const mockPokemons: PokemonItem[] = [
-    { name: 'bulbasaur', url: `${SPRITE_BASE_URL}1/` },
-    { name: 'ivysaur', url: `${SPRITE_BASE_URL}2/` },
-    { name: 'venusaur', url: `${SPRITE_BASE_URL}3/` },
+    { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
+    { name: 'ivysaur', url: 'https://pokeapi.co/api/v2/pokemon/2/' },
+    { name: 'venusaur', url: 'https://pokeapi.co/api/v2/pokemon/3/' },
   ];
 
   it('renders message when no pokemons are provided', () => {
@@ -30,7 +29,7 @@ describe('CardList component', () => {
     expect(cards).toHaveLength(mockPokemons.length);
   });
 
-  it('renders container with class "card-list"', () => {
+  it('renders container with role region and label "card-list"', () => {
     render(<CardList pokemons={mockPokemons} />);
     const container = screen.getByRole('region', { name: /card-list/i });
     expect(container).toBeInTheDocument();

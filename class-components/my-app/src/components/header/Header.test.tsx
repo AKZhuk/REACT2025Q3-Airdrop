@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Header from './Header';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import * as ThemeContext from '../../context/ThemeContext';
 
 describe('Header component', () => {
@@ -20,17 +20,19 @@ describe('Header component', () => {
 
   const renderWithRouter = () =>
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <Header />
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
   it('renders the title and navigation links', () => {
     renderWithRouter();
 
-    expect(screen.getByText(/Pokemon Search/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Home/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /About/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /pokemon search/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /about/i })).toBeInTheDocument();
   });
 
   it('renders the theme toggle button and calls toggleTheme on click', () => {
@@ -40,6 +42,6 @@ describe('Header component', () => {
     expect(themeButton).toBeInTheDocument();
 
     fireEvent.click(themeButton);
-    expect(mockToggleTheme).toHaveBeenCalled();
+    expect(mockToggleTheme).toHaveBeenCalledTimes(1);
   });
 });

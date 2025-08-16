@@ -22,7 +22,7 @@ const CardList: React.FC<Props> = ({ pokemons }) => {
   }
 
   return (
-    <div className="card-list">
+    <div className="card-list" role="region" aria-label="card-list">
       {pokemons.map((pokemon) => (
         <Card
           key={pokemon.name}

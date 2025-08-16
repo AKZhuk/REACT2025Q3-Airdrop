@@ -1,33 +1,50 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import Main from './Main';
-import * as api from '../../api/api';
 import type { PokemonItem } from '../../types';
 
-jest.mock('../api/api');
-
-jest.mock('./Search', () => ({
+jest.mock('../../api/api', () => ({
   __esModule: true,
-  default: ({ onSearch }: { onSearch: (term: string) => void }) => (
-    <div>
-      <input
-        data-testid="search-input"
-        onChange={(e) => onSearch(e.target.value)}
-      />
-    </div>
-  ),
+  fetchPokemonList: jest.fn(),
 }));
+import { fetchPokemonList } from '../../api/api';
 
-jest.mock('./CardList', () => ({
-  __esModule: true,
-  default: ({ pokemons }: { pokemons: PokemonItem[] }) => (
-    <div data-testid="card-list">
-      {pokemons.map((p) => (
-        <div key={p.name}>{p.name}</div>
-      ))}
-    </div>
-  ),
-}));
+jest.mock('../search/Search', () => {
+  type Props = { onSearch: (term: string) => void };
+
+  function MockSearch({ onSearch }: Props) {
+    return (
+      <div>
+        <input
+          data-testid="search-input"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onSearch(e.target.value)
+          }
+        />
+      </div>
+    );
+  }
+  MockSearch.displayName = 'MockSearch';
+
+  return { __esModule: true, default: MockSearch };
+});
+
+jest.mock('../cardList/CardList', () => {
+  type Props = { pokemons: PokemonItem[] };
+
+  function MockCardList({ pokemons }: Props) {
+    return (
+      <div data-testid="card-list">
+        {pokemons.map((p) => (
+          <div key={p.name}>{p.name}</div>
+        ))}
+      </div>
+    );
+  }
+  MockCardList.displayName = 'MockCardList';
+
+  return { __esModule: true, default: MockCardList };
+});
 
 describe('Main component', () => {
   const mockPokemons = {
@@ -50,7 +67,8 @@ describe('Main component', () => {
   });
 
   it('loads pokemons on mount (success)', async () => {
-    (api.fetchPokemonList as jest.Mock).mockResolvedValueOnce(mockPokemons);
+    (fetchPokemonList as jest.Mock).mockResolvedValueOnce(mockPokemons);
+
     render(<Main />);
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -63,9 +81,10 @@ describe('Main component', () => {
   });
 
   it('shows error message on API failure', async () => {
-    (api.fetchPokemonList as jest.Mock).mockRejectedValueOnce(
+    (fetchPokemonList as jest.Mock).mockRejectedValueOnce(
       new Error('API Error')
     );
+
     render(<Main />);
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -76,14 +95,14 @@ describe('Main component', () => {
   });
 
   it('calls handleSearch when input changes', async () => {
-    (api.fetchPokemonList as jest.Mock).mockResolvedValueOnce(mockPokemons);
+    (fetchPokemonList as jest.Mock).mockResolvedValueOnce(mockPokemons);
     render(<Main />);
 
     const input = screen.getByTestId('search-input');
     fireEvent.change(input, { target: { value: 'charizard' } });
 
     await waitFor(() => {
-      expect(api.fetchPokemonList).toHaveBeenCalledWith('charizard', 20, 0);
+      expect(fetchPokemonList).toHaveBeenCalledWith('charizard', 20, 0);
     });
   });
 

@@ -4,11 +4,15 @@ import './Pagination.css';
 
 const Pagination: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const currentPage = Number(searchParams.get('page')) || 1;
+  const currentPage = Number(searchParams.get('page') ?? '1') || 1;
 
   const handlePageChange = (newPage: number) => {
-    searchParams.set('page', newPage.toString());
-    setSearchParams(searchParams);
+    const next = Math.max(1, newPage);
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      params.set('page', String(next));
+      return params;
+    });
   };
 
   return (
@@ -20,7 +24,9 @@ const Pagination: React.FC = () => {
       >
         Previous
       </button>
+
       <span className="pagination__info">Page {currentPage}</span>
+
       <button
         className="pagination__button"
         onClick={() => handlePageChange(currentPage + 1)}
