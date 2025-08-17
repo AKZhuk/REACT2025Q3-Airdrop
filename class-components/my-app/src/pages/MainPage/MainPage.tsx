@@ -9,22 +9,27 @@ import { useSearchParams } from 'next/navigation';
 import { useAppDispatch } from '../../store/hooks';
 import { pokemonApi, useGetPokemonListQuery } from '../../api/pokemonApi';
 import { useTranslations } from 'next-intl';
+import type { PokemonItem } from '../../types';
 import './MainPage.css';
 
-const MainPage: React.FC = () => {
+type Props = {
+  initialPokemons?: PokemonItem[];
+};
+
+const MainPage: React.FC<Props> = ({ initialPokemons = [] }) => {
   const t = useTranslations('MainPage');
   const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const searchTerm = searchParams?.get('q') ?? '';
-  const page = Number(searchParams?.get('page') ?? '1') || 1;
+  const searchTerm = searchParams.get('q') || '';
+  const page = Number(searchParams.get('page')) || 1;
 
   const { data, isLoading, isError, error } =
     useGetPokemonListQuery({ searchTerm, page });
 
   const handleSearch = (term: string) => {
-    const params = new URLSearchParams(searchParams?.toString() ?? '');
+    const params = new URLSearchParams(searchParams.toString());
     params.set('q', term);
     params.set('page', '1');
     router.push(`/?${params.toString()}`);
@@ -34,6 +39,10 @@ const MainPage: React.FC = () => {
     dispatch(pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }]));
   };
 
+  const list =
+    data?.results ??
+    (searchTerm === '' && page === 1 ? initialPokemons : undefined);
+
   return (
     <div className="main-page">
       <Search onSearch={handleSearch} />
@@ -41,15 +50,17 @@ const MainPage: React.FC = () => {
         {t('refresh')}
       </button>
 
-      {isLoading && <p className="main-loading">{t('loading')}</p>}
+      {isLoading && !list && <p className="main-loading">{t('loading')}</p>}
+
       {isError && (
         <p className="main-error">
-          {t('error')}
+          {error instanceof Error ? error.message : t('error')}
         </p>
       )}
-      {!isLoading && !isError && data && (
+
+      {list && (
         <>
-          <CardList pokemons={data.results} />
+          <CardList pokemons={list} />
           <Pagination />
         </>
       )}
