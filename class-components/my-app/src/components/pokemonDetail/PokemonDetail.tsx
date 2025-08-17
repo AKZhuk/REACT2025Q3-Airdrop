@@ -1,61 +1,41 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
-import { useDispatch } from 'react-redux';
-import { pokemonApi } from '../../api/pokemonApi';
-import './PokemonDetail.css';
+import React from 'react';
+import type { PokemonItem } from '../../types';
+import Card from '../card/Card';
+import { useRouter } from '../../i18n/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import './CardList.css';
 
-const PokemonDetail: React.FC = () => {
-  const searchParams = useSearchParams();
+interface Props { pokemons: PokemonItem[]; }
+
+const CardList: React.FC<Props> = ({ pokemons }) => {
+  const t = useTranslations('CardList');
   const router = useRouter();
-  const detailsId = searchParams.get('details');
+  const searchParams = useSearchParams();
 
-  const dispatch = useDispatch();
-  const [fetchPokemon, { data: pokemon, isLoading, isError }] =
-    useLazyGetPokemonByNameQuery();
-
-  useEffect(() => {
-    if (detailsId) fetchPokemon(detailsId);
-  }, [detailsId, fetchPokemon]);
-
-  const handleClose = () => {
+  const handleCardClick = (name: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete('details');
+    params.set('details', name);
     router.push(`/?${params.toString()}`);
   };
 
-  const handleRefresh = async () => {
-    if (detailsId) {
-      await dispatch(
-        pokemonApi.util.invalidateTags([{ type: 'PokemonDetails', id: detailsId }])
-      );
-      fetchPokemon(detailsId, true);
-    }
-  };
-
-  if (!detailsId) return null;
+  if (pokemons.length === 0) {
+    return <p className="empty">{t('empty')}</p>;
+  }
 
   return (
-    <div className="pokemon-detail">
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button className="pokemon-detail__close-button" onClick={handleClose}>Close</button>
-        <button className="pokemon-detail__refresh-button" onClick={handleRefresh}>🔄 Refresh</button>
-      </div>
-
-      {isLoading && <p>Loading details...</p>}
-      {isError && <p>Pokemon not found</p>}
-      {pokemon && (
-        <div className="pokemon-detail__info">
-          <h2>{pokemon.name}</h2>
-          <img src={pokemon.sprites.front_default} alt={pokemon.name} />
-          <p>Height: {pokemon.height}</p>
-          <p>Weight: {pokemon.weight}</p>
-        </div>
-      )}
+    <div className="card-list" aria-label="card-list">
+      {pokemons.map((pokemon) => (
+        <Card
+          key={pokemon.name}
+          pokemon={pokemon}
+          onClick={() => handleCardClick(pokemon.name)}
+        />
+      ))}
     </div>
   );
 };
 
-export default PokemonDetail;
+export default CardList;
