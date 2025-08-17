@@ -31,8 +31,6 @@ const MainPage = () => {
     dispatch(pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }]));
   };
 
-  useEffect(() => {
-  }, [data]);
 
   return (
     <div className="main-page">
