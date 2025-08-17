@@ -1,29 +1,29 @@
+'use client';
+
 import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useLazyGetPokemonByNameQuery, pokemonApi } from '../../api/pokemonApi';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
 import { useDispatch } from 'react-redux';
+import { pokemonApi } from '../../api/pokemonApi';
 import './PokemonDetail.css';
 
 const PokemonDetail: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const detailsId = searchParams.get('details');
 
   const dispatch = useDispatch();
-
-  const [
-    fetchPokemonByName,
-    { data: pokemon, isLoading, isError },
-  ] = useLazyGetPokemonByNameQuery();
+  const [fetchPokemon, { data: pokemon, isLoading, isError }] =
+    useLazyGetPokemonByNameQuery();
 
   useEffect(() => {
-    if (detailsId) {
-      fetchPokemonByName(detailsId);
-    }
-  }, [detailsId, fetchPokemonByName]);
+    if (detailsId) fetchPokemon(detailsId);
+  }, [detailsId, fetchPokemon]);
 
   const handleClose = () => {
-    searchParams.delete('details');
-    setSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('details');
+    router.push(`/?${params.toString()}`);
   };
 
   const handleRefresh = async () => {
@@ -31,7 +31,7 @@ const PokemonDetail: React.FC = () => {
       await dispatch(
         pokemonApi.util.invalidateTags([{ type: 'PokemonDetails', id: detailsId }])
       );
-      fetchPokemonByName(detailsId, true);
+      fetchPokemon(detailsId, true);
     }
   };
 
@@ -40,12 +40,8 @@ const PokemonDetail: React.FC = () => {
   return (
     <div className="pokemon-detail">
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button className="pokemon-detail__close-button" onClick={handleClose}>
-          Close
-        </button>
-        <button className="pokemon-detail__refresh-button" onClick={handleRefresh}>
-          🔄 Refresh
-        </button>
+        <button className="pokemon-detail__close-button" onClick={handleClose}>Close</button>
+        <button className="pokemon-detail__refresh-button" onClick={handleRefresh}>🔄 Refresh</button>
       </div>
 
       {isLoading && <p>Loading details...</p>}

@@ -1,20 +1,21 @@
+'use client';
+
 import React from 'react';
 import type { PokemonItem } from '../../types';
 import Card from '../card/Card';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useRouter, useSearchParams } from 'next/navigation';
 import './CardList.css';
 
-interface Props {
-  pokemons: PokemonItem[];
-}
+interface Props { pokemons: PokemonItem[]; }
 
 const CardList: React.FC<Props> = ({ pokemons }) => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleCardClick = (name: string) => {
-    searchParams.set('details', name);
-    navigate(`/?${searchParams.toString()}`, { replace: false });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('details', name);
+    router.push(`/?${params.toString()}`);
   };
 
   if (pokemons.length === 0) {
@@ -22,7 +23,7 @@ const CardList: React.FC<Props> = ({ pokemons }) => {
   }
 
   return (
-    <div className="card-list" role="region" aria-label="card-list">
+    <div className="card-list" aria-label="card-list">
       {pokemons.map((pokemon) => (
         <Card
           key={pokemon.name}

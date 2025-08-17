@@ -1,18 +1,18 @@
+'use client';
+
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useRouter, useSearchParams } from 'next/navigation';
 import './Pagination.css';
 
 const Pagination: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const currentPage = Number(searchParams.get('page') ?? '1') || 1;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentPage = Number(searchParams.get('page')) || 1;
 
   const handlePageChange = (newPage: number) => {
-    const next = Math.max(1, newPage);
-    setSearchParams(prev => {
-      const params = new URLSearchParams(prev);
-      params.set('page', String(next));
-      return params;
-    });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(newPage));
+    router.push(`/?${params.toString()}`);
   };
 
   return (
@@ -24,9 +24,7 @@ const Pagination: React.FC = () => {
       >
         Previous
       </button>
-
       <span className="pagination__info">Page {currentPage}</span>
-
       <button
         className="pagination__button"
         onClick={() => handlePageChange(currentPage + 1)}
