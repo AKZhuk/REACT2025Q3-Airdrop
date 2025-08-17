@@ -22,5 +22,16 @@
     "notFound": "Pokemon not found",
     "height": "Height",
     "weight": "Weight"
+  }, 
+  "About": {
+    "title": "About This App",
+    "author": "Author: Artsiom Luksha",
+    "courseLink": "RS School React Course",
+    "sampleLoaded": "Sample loaded on server"
+  },
+  "NotFound": {
+    "title": "404 — Page Not Found",
+    "description": "The page you are looking for doesn't exist.",
+    "cta": "Go to Home"
   }
 }

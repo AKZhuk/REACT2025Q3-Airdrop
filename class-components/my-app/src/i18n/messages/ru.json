@@ -22,5 +22,16 @@
     "notFound": "Покемон не найден",
     "height": "Рост",
     "weight": "Вес"
+  },
+  "About": {
+    "title": "О приложении",
+    "author": "Автор: Artsiom Luksha",
+    "courseLink": "Курс RS School React",
+    "sampleLoaded": "Пример данных, загруженных на сервере"
+  },
+  "NotFound": {
+    "title": "404 — Страница не найдена",
+    "description": "Похоже, такой страницы не существует.",
+    "cta": "На главную"
   }
 }
