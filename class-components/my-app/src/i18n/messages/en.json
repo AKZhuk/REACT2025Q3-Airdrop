@@ -1,0 +1,26 @@
+{
+  "Header": {
+    "title": "Pokemon Search",
+    "home": "Home",
+    "about": "About",
+    "theme": "Theme",
+    "light": "🌞 Light",
+    "dark": "🌙 Dark",
+    "lang": "Language"
+  },
+  "MainPage": {
+    "refresh": "🔄 Refresh",
+    "loading": "Loading...",
+    "error": "Failed to fetch Pokemons"
+  },
+  "CardList": {
+    "empty": "Nothing was found"
+  },
+  "Detail": {
+    "close": "Close",
+    "refresh": "🔄 Refresh",
+    "notFound": "Pokemon not found",
+    "height": "Height",
+    "weight": "Weight"
+  }
+}
