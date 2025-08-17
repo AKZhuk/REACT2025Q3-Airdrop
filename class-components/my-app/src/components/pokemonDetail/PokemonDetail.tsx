@@ -1,41 +1,46 @@
 'use client';
 
-import React from 'react';
-import type { PokemonItem } from '../../types';
-import Card from '../card/Card';
-import { useRouter } from '../../i18n/navigation';
+import React, { useEffect } from 'react';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import './CardList.css';
+import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
+import './PokemonDetail.css';
 
-interface Props { pokemons: PokemonItem[]; }
-
-const CardList: React.FC<Props> = ({ pokemons }) => {
-  const t = useTranslations('CardList');
-  const router = useRouter();
+const PokemonDetail: React.FC = () => {
   const searchParams = useSearchParams();
+  const detailsId = searchParams.get('details');
 
-  const handleCardClick = (name: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('details', name);
-    router.push(`/?${params.toString()}`);
-  };
+  const [fetchByName, { data: pokemon, isLoading, isError }] =
+    useLazyGetPokemonByNameQuery();
 
-  if (pokemons.length === 0) {
-    return <p className="empty">{t('empty')}</p>;
-  }
+  useEffect(() => {
+    if (detailsId) fetchByName(detailsId);
+  }, [detailsId, fetchByName]);
+
+  if (!detailsId) return null;
 
   return (
-    <div className="card-list" aria-label="card-list">
-      {pokemons.map((pokemon) => (
-        <Card
-          key={pokemon.name}
-          pokemon={pokemon}
-          onClick={() => handleCardClick(pokemon.name)}
-        />
-      ))}
+    <div className="pokemon-detail">
+      {isLoading && <p>Loading details...</p>}
+      {isError && <p>Pokemon not found</p>}
+      {pokemon && (
+        <div className="pokemon-detail__info">
+          <h2>{pokemon.name}</h2>
+          {pokemon.sprites?.front_default && (
+            <Image
+              className="pokemon-detail__img"
+              src={pokemon.sprites.front_default}
+              alt={pokemon.name}
+              width={120}
+              height={120}
+            />
+          )}
+          <p>Height: {pokemon.height}</p>
+          <p>Weight: {pokemon.weight}</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default CardList;
+export default PokemonDetail;
