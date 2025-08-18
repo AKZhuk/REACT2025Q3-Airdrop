@@ -1,43 +1,32 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { clearItems } from '../../store/selectedItemsSlice';
+import { downloadCSV } from '../../utils/downloadCSV';
 import './SelectedFlyout.css';
 
 const SelectedFlyout: React.FC = () => {
   const dispatch = useAppDispatch();
   const selectedItems = useAppSelector((state) => state.selectedItems.items);
+  const [downloading, setDownloading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleClear = () => {
     dispatch(clearItems());
   };
 
   const handleDownload = async () => {
-    if (selectedItems.length === 0) return;
+    if (selectedItems.length === 0 || downloading) return;
 
+    setErrorMsg(null);
+    setDownloading(true);
     try {
-      const res = await fetch('/api/csv', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(selectedItems),
-      });
-
-      if (!res.ok) {
-        throw new Error(`CSV export failed: ${res.status}`);
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedItems.length}_items.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error(e);
+      await downloadCSV(selectedItems);
+    } catch {
+      setErrorMsg('Failed to export CSV');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -48,8 +37,15 @@ const SelectedFlyout: React.FC = () => {
       <span>{selectedItems.length} item(s) selected</span>
       <div className="flyout__buttons">
         <button onClick={handleClear}>Unselect all</button>
-        <button onClick={handleDownload}>Download</button>
+        <button onClick={handleDownload} disabled={downloading}>
+          {downloading ? 'Downloading…' : 'Download'}
+        </button>
       </div>
+      {errorMsg && (
+        <span role="alert" style={{ marginLeft: '1rem' }}>
+          {errorMsg}
+        </span>
+      )}
     </div>
   );
 };

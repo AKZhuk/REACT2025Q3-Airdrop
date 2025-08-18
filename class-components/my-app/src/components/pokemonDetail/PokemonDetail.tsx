@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { useLazyGetPokemonByNameQuery } from '../../api/pokemonApi';
+import { useLazyGetPokemonByNameQuery } from '@/api/pokemonApi';
+import Image from 'next/image';
 import './PokemonDetail.css';
 
 const PokemonDetail: React.FC = () => {
@@ -21,14 +21,14 @@ const PokemonDetail: React.FC = () => {
 
   return (
     <div className="pokemon-detail">
+
       {isLoading && <p>Loading details...</p>}
       {isError && <p>Pokemon not found</p>}
       {pokemon && (
         <div className="pokemon-detail__info">
           <h2>{pokemon.name}</h2>
-          {pokemon.sprites?.front_default && (
+          {pokemon.sprites.front_default && (
             <Image
-              className="pokemon-detail__img"
               src={pokemon.sprites.front_default}
               alt={pokemon.name}
               width={120}
