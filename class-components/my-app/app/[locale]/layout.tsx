@@ -18,7 +18,7 @@ export default async function LocaleLayout({
 
   unstable_setRequestLocale(locale);
 
-  const messages = (await import(`../../messages/${locale}.json`)).default;
+  const messages = (await import(`../../src/i18n/messages/${locale}.json`)).default;
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
