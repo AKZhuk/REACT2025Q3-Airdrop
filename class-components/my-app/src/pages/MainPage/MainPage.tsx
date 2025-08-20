@@ -12,36 +12,39 @@ import { useTranslations } from 'next-intl';
 import type { PokemonItem } from '../../types';
 import './MainPage.css';
 
-type Props = {
+type MainPageProps = {
   initialPokemons?: PokemonItem[];
 };
 
-const MainPage: React.FC<Props> = ({ initialPokemons = [] }) => {
+const MainPage: React.FC<MainPageProps> = ({ initialPokemons = [] }) => {
   const t = useTranslations('MainPage');
   const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const searchTerm = searchParams.get('q') || '';
-  const page = Number(searchParams.get('page')) || 1;
+  const searchTerm = searchParams?.get('q') ?? '';
+  const page = Number(searchParams?.get('page') ?? '1');
 
   const { data, isLoading, isError, error } =
     useGetPokemonListQuery({ searchTerm, page });
 
   const handleSearch = (term: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+  
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
     params.set('q', term);
     params.set('page', '1');
     router.push(`/?${params.toString()}`);
   };
 
   const handleRefresh = () => {
-    dispatch(pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }]));
+    dispatch(
+      pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }])
+    );
   };
 
-  const list =
+  const list: PokemonItem[] =
     data?.results ??
-    (searchTerm === '' && page === 1 ? initialPokemons : undefined);
+    (searchTerm === '' && page === 1 ? initialPokemons : []);
 
   return (
     <div className="main-page">
@@ -50,7 +53,7 @@ const MainPage: React.FC<Props> = ({ initialPokemons = [] }) => {
         {t('refresh')}
       </button>
 
-      {isLoading && !list && <p className="main-loading">{t('loading')}</p>}
+      {isLoading && !data && <p className="main-loading">{t('loading')}</p>}
 
       {isError && (
         <p className="main-error">
@@ -58,7 +61,7 @@ const MainPage: React.FC<Props> = ({ initialPokemons = [] }) => {
         </p>
       )}
 
-      {list && (
+      {!isError && (
         <>
           <CardList pokemons={list} />
           <Pagination />

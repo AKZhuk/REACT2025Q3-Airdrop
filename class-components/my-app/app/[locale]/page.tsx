@@ -4,12 +4,10 @@ import MainPage from '@/pages/MainPage/MainPage';
 
 export const revalidate = 60;
 
-export default async function AboutPage() {
-  const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10&offset=0');
-
-  if (!res.ok) {
-    return <MainPage initialPokemons={[]} />;
-  }
+export default async function HomePage() {
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10&offset=0', {
+    next: { revalidate },
+  });
 
   const data = await res.json();
   const initialPokemons = (data.results ?? []) as PokemonItem[];

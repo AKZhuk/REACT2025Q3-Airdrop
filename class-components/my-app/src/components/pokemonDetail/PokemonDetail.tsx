@@ -13,7 +13,7 @@ const PokemonDetail: React.FC = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const detailsId = searchParams.get('details');
+  const detailsId = searchParams?.get('details') ?? null;
 
   const [fetchByName, { data: pokemon, isLoading, isError }] =
     useLazyGetPokemonByNameQuery();
@@ -27,7 +27,7 @@ const PokemonDetail: React.FC = () => {
   if (!detailsId) return null;
 
   const handleClose = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
     params.delete('details');
     router.push(`/?${params.toString()}`);
   };

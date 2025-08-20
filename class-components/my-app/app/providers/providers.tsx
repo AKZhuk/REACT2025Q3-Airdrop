@@ -1,8 +1,9 @@
 'use client';
 
+import React from 'react';
 import { Provider } from 'react-redux';
-import { store } from '../src/store';
-import { ThemeProvider } from '../src/context/ThemeContext';
+import { store } from '@/store';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
