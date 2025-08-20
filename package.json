@@ -1,16 +1,57 @@
 {
-  "devDependencies": {
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
-    "@types/jest": "^30.0.0",
-    "eslint-config-prettier": "^10.1.5",
-    "jest": "^30.0.4",
-    "prettier": "^3.6.2",
-    "ts-jest": "^29.4.0"
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "next": "^15.4.6",
+    "next-intl": "^3.26.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-redux": "^9.2.0",
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "lint": "eslint . --ext .js,.ts,.tsx",
-    "format": "prettier --write .",
-    "prepare": "husky install"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest --watch",
+    "format": "prettier --write ."
+  },
+  "eslintConfig": {
+    "extends": [
+      "next/core-web-vitals"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "autoprefixer": "^10.4.21",
+    "eslint-config-next": "^15.4.6",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.0",
+    "jest": "^30.0.4"
   }
 }
